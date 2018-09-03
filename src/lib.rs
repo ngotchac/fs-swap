@@ -1,5 +1,8 @@
 //! Cross-platform implementation of path swap.
 
+#[macro_use]
+extern crate log;
+
 #[cfg(target_os = "macos")]
 #[macro_use]
 extern crate lazy_static;
@@ -40,9 +43,10 @@ pub fn swap_nonatomic<A, B>(a: A, b: B) -> io::Result<()> where A: AsRef<Path>, 
 
 	match fs::rename(b, a) {
 		Ok(_) => (),
-		Err(_) => {
+		Err(err) => {
 			// let's try to recover the previous state
 			// if it fails, there is nothing we can do
+			error!("swap_nonatomic failed: {:?}", err);
 			return fs::rename(&tmp, a);
 		},
 	}
@@ -50,9 +54,10 @@ pub fn swap_nonatomic<A, B>(a: A, b: B) -> io::Result<()> where A: AsRef<Path>, 
 	// rename tmp to b
 	match fs::rename(&tmp, b) {
 		Ok(_) => Ok(()),
-		Err(_) => {
+		Err(err) => {
 			// let's try to recover to previous state
 			// if it fails, there is nothing we can do
+			error!("swap_nonatomic failed: {:?}", err);
 			fs::rename(a, b)?;
 			fs::rename(&tmp, a)
 		},
