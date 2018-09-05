@@ -19,7 +19,7 @@ pub fn swap<A, B>(a: A, b: B) -> io::Result<()> where A: AsRef<Path>, B: AsRef<P
 
 /// Nonatomic swap.
 pub fn swap_nonatomic<A, B>(a: A, b: B) -> io::Result<()> where A: AsRef<Path>, B: AsRef<Path> {
-	const TMP_SWAP_FILE: &'static str = "tmp.fs_swap";
+	const TMP_SWAP_FILE: &'static str = "tmp_fs_swap";
 
 	let a = a.as_ref();
 	let b = b.as_ref();
