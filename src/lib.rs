@@ -43,10 +43,23 @@ pub fn swap_nonatomic<A, B>(a: A, b: B) -> io::Result<()> where A: AsRef<Path>, 
 
 	// Delete `a` (might still be there on Windows)
 	match fs::metadata(&a) {
-		Ok(ref meta) if meta.is_dir() => fs::remove_dir_all(&a)?,
-		Ok(_) => fs::remove_file(&a)?,
+		Ok(ref meta) => {
+			warn!("a metadata: {:?}", meta);
+			if meta.is_dir() {
+				fs::remove_dir_all(&a)?
+			} else {
+				fs::remove_file(&a)?
+			}
+		},
 		Err(ref err) if err.kind() == io::ErrorKind::NotFound => (),
 		Err(err) => return Err(err),
+	}
+	
+	match fs::metadata(&b) {
+		Ok(ref meta) => {
+			warn!("b metadata: {:?}", meta);
+		},
+		_ => (),
 	}
 
 	match fs::rename(b, a) {
