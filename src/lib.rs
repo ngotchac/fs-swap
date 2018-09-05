@@ -46,7 +46,7 @@ pub fn swap_nonatomic<A, B>(a: A, b: B) -> io::Result<()> where A: AsRef<Path>, 
 		Err(err) => {
 			// let's try to recover the previous state
 			// if it fails, there is nothing we can do
-			error!("swap_nonatomic failed: {:?}", err);
+			error!("swap_nonatomic failed b=>a: {:?}", err);
 			return fs::rename(&tmp, a);
 		},
 	}
@@ -57,7 +57,7 @@ pub fn swap_nonatomic<A, B>(a: A, b: B) -> io::Result<()> where A: AsRef<Path>, 
 		Err(err) => {
 			// let's try to recover to previous state
 			// if it fails, there is nothing we can do
-			error!("swap_nonatomic failed: {:?}", err);
+			error!("swap_nonatomic failed tmp=>b: {:?}", err);
 			fs::rename(a, b)?;
 			fs::rename(&tmp, a)
 		},
