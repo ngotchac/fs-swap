@@ -41,6 +41,14 @@ pub fn swap_nonatomic<A, B>(a: A, b: B) -> io::Result<()> where A: AsRef<Path>, 
 	// if it fails, the directories are unchanged
 	fs::rename(a, &tmp)?;
 
+	// Delete `a` (might still be there on Windows)
+	match fs::metadata(&a) {
+		Ok(ref meta) if meta.is_dir() => fs::remove_dir_all(&a)?,
+		Ok(_) => fs::remove_file(&a)?,
+		Err(ref err) if err.kind() == io::ErrorKind::NotFound => (),
+		Err(err) => return Err(err),
+	}
+
 	match fs::rename(b, a) {
 		Ok(_) => (),
 		Err(err) => {
@@ -49,6 +57,14 @@ pub fn swap_nonatomic<A, B>(a: A, b: B) -> io::Result<()> where A: AsRef<Path>, 
 			error!("swap_nonatomic failed b=>a: {:?}", err);
 			return fs::rename(&tmp, a);
 		},
+	}
+
+	// Delete `b` (might still be there on Windows)
+	match fs::metadata(&b) {
+		Ok(ref meta) if meta.is_dir() => fs::remove_dir_all(&b)?,
+		Ok(_) => fs::remove_file(&b)?,
+		Err(ref err) if err.kind() == io::ErrorKind::NotFound => (),
+		Err(err) => return Err(err),
 	}
 
 	// rename tmp to b
