@@ -29,6 +29,8 @@ pub fn swap_nonatomic<A, B>(a: A, b: B) -> io::Result<()> where A: AsRef<Path>, 
 		.ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "Could not find a parent directory"))?
 		.join(TMP_SWAP_FILE);
 
+	warn!("Swapping {:?} and {:?} via {:?}", a, b, tmp);
+
 	// cleanup
 	match fs::metadata(&tmp) {
 		Ok(ref meta) if meta.is_dir() => fs::remove_dir_all(&tmp)?,
@@ -54,7 +56,7 @@ pub fn swap_nonatomic<A, B>(a: A, b: B) -> io::Result<()> where A: AsRef<Path>, 
 		Err(ref err) if err.kind() == io::ErrorKind::NotFound => (),
 		Err(err) => return Err(err),
 	}
-	
+
 	match fs::metadata(&b) {
 		Ok(ref meta) => {
 			warn!("b metadata: {:?}", meta);
